@@ -386,9 +386,13 @@ namespace _animate
                 nodeTarget.translation[0] + cdbl(value[0]),
                 nodeTarget.translation[1] + cdbl(value[1])
             ]
-        end if
-
-        if (_animate.is.special.translation(property))
+        else if (_animate.is.special.translation(property) and _animate.utils.compareFieldStrings(property, "translationTo") and _animate.is.arr2d(value))
+            value = [
+                cdbl(value[0]),
+                cdbl(value[1])
+            ]
+            property = "translation"
+        else if (_animate.is.special.translation(property))
             value = cdbl(value)
             if (_animate.utils.compareFieldStrings(property, "x"))
                 value = [value, nodeTarget.translation[1]]
@@ -404,7 +408,9 @@ namespace _animate
             property = "translation"
         end if
 
-        if (property = "rotation" and _animate.is.str(value) and value.endsWith("deg"))
+        ops = GetInterface(value, "ifStringOps")
+
+        if (property = "rotation" and _animate.is.str(value) and ops <> invalid and ops.endsWith("deg"))
             degrees = value.tokenize("deg")[0].toFloat()
             value = degrees * _animate.utils.constants.radiansFactor
         end if
@@ -596,7 +602,7 @@ namespace _animate
                     return false
                 end if
 
-                specialProperties = ["x", "y", "translateX", "translateY"]
+                specialProperties = ["x", "y", "translateX", "translateY", "translationTo"]
                 for each specialProperty in specialProperties
                     if (_animate.utils.compareFieldStrings(specialProperty, x))
                         return true

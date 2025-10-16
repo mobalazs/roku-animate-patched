@@ -486,6 +486,7 @@ namespace _animate
 
     class Timeline
         private nodeObject as object = {}
+        private inheritableParams as object = {}
 
         sub new(params as object)
             sequential = false

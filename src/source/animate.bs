@@ -615,10 +615,39 @@ namespace _animate
     end namespace
 
     namespace utils
+
         function createNodeFromAA(aa as object) as object
-            node = CreateObject("roSGNode", aa.subtype)
+            ' Make sure we have an associative array to process
+            if Type(aa) <> "roAssociativeArray"
+                return invalid
+            end if
+
+            ' Fetch subtype if it exists, otherwise provide a default
+            nodeSubtype = "Group" ' Example default node type
+            if aa.Lookup("subtype") <> invalid
+                nodeSubtype = aa.subtype
+            end if
+
+            ' Create a new node with the given (or default) subtype
+            node = CreateObject("roSGNode", nodeSubtype)
+
+            ' If we have a "children" key and it's an array, recurse
+            if aa.Lookup("children") <> invalid and Type(aa.children) = "roArray"
+                for each childAA in aa.children
+                    ' Recursively create child nodes
+                    childNode = _animate.utils.createNodeFromAA(childAA)
+                    if childNode <> invalid
+                        node.appendChild(childNode)
+                    end if
+                end for
+            end if
+            ' Clean up the keys we no longer need in this AA
             aa.delete("subtype")
-            node.update(aa)
+            aa.delete("children")
+
+            ' Set all remaining fields on the node from the AA
+            node.update(aa, true)
+
             return node
         end function
 
